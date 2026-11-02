@@ -18,8 +18,8 @@
 Enterprise Integration Architect & AI Product Owner | Kubernetes | Docker | Linux | SRE | Observability | Grafana
 
 - GitHub: [@Shivanand14](https://github.com/Shivanand14)
-- LinkedIn: [Shivanand Sanglage](https://linkedin.com/in/shivanand-sanglage)
-- Email: shivanand.sanglage@example.com
+- LinkedIn: [Shivanand Sanglage](www.linkedin.com/in/shivanand-sanglage-4a036350)
+- Email: shivanannd55@gmail.com
 
 ---
 
