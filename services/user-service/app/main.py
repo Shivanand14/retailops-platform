@@ -1,6 +1,7 @@
 """
 RetailOps Platform — User Service (FastAPI)
 """
+
 from __future__ import annotations
 
 import os
@@ -79,7 +80,9 @@ async def metrics_middleware(request: Request, call_next):
 
 @app.get("/healthz", response_model=HealthResponse, tags=["health"])
 async def liveness():
-    return HealthResponse(status="healthy", service=SERVICE_NAME, version=SERVICE_VERSION)
+    return HealthResponse(
+        status="healthy", service=SERVICE_NAME, version=SERVICE_VERSION
+    )
 
 
 @app.get("/ready", response_model=HealthResponse, tags=["health"])
@@ -94,9 +97,12 @@ async def metrics():
 
 @app.get("/users/{user_id}", response_model=UserProfile, tags=["users"])
 async def get_user(user_id: str):
-    return UserProfile(user_id=user_id, email=f"{user_id}@retailops.local", tier="standard")
+    return UserProfile(
+        user_id=user_id, email=f"{user_id}@retailops.local", tier="standard"
+    )
 
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8080)

@@ -1,6 +1,7 @@
 """
 RetailOps Platform — Inventory Service (FastAPI)
 """
+
 from __future__ import annotations
 
 import os
@@ -85,7 +86,9 @@ async def metrics_middleware(request: Request, call_next):
 
 @app.get("/healthz", response_model=HealthResponse, tags=["health"])
 async def liveness():
-    return HealthResponse(status="healthy", service=SERVICE_NAME, version=SERVICE_VERSION)
+    return HealthResponse(
+        status="healthy", service=SERVICE_NAME, version=SERVICE_VERSION
+    )
 
 
 @app.get("/ready", response_model=HealthResponse, tags=["health"])
@@ -113,4 +116,5 @@ async def check_inventory(item: InventoryCheck):
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8080)
