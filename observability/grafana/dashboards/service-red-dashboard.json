@@ -1,0 +1,143 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "RetailOps — Service RED Metrics",
+    "tags": ["retailops", "sre", "observability"],
+    "timezone": "UTC",
+    "schemaVersion": 38,
+    "version": 1,
+    "refresh": "10s",
+    "panels": [
+      {
+        "type": "stat",
+        "title": "Request Rate (req/s)",
+        "gridPos": {"x": 0, "y": 0, "w": 12, "h": 4},
+        "targets": [
+          {
+            "expr": "sum(rate(http_requests_total[1m])) by (service)",
+            "legendFormat": "{{service}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ops",
+            "decimals": 2
+          }
+        }
+      },
+      {
+        "type": "stat",
+        "title": "Error Rate (%)",
+        "gridPos": {"x": 12, "y": 0, "w": 12, "h": 4},
+        "targets": [
+          {
+            "expr": "100 * sum(rate(http_requests_total{status=~\"5..\"}[1m])) by (service) / sum(rate(http_requests_total[1m])) by (service)",
+            "legendFormat": "{{service}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "decimals": 2,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "orange", "value": 1},
+                {"color": "red", "value": 5}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "type": "stat",
+        "title": "p95 Latency (ms)",
+        "gridPos": {"x": 0, "y": 4, "w": 12, "h": 4},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[1m])) by (le, service)) * 1000",
+            "legendFormat": "{{service}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ms",
+            "decimals": 2,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "orange", "value": 200},
+                {"color": "red", "value": 500}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "type": "graph",
+        "title": "Request Rate Over Time",
+        "gridPos": {"x": 0, "y": 8, "w": 24, "h": 6},
+        "targets": [
+          {
+            "expr": "sum(rate(http_requests_total[1m])) by (service)",
+            "legendFormat": "{{service}}",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "type": "graph",
+        "title": "Error Rate Over Time",
+        "gridPos": {"x": 0, "y": 14, "w": 24, "h": 6},
+        "targets": [
+          {
+            "expr": "100 * sum(rate(http_requests_total{status=~\"5..\"}[1m])) by (service) / sum(rate(http_requests_total[1m])) by (service)",
+            "legendFormat": "{{service}}",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "type": "graph",
+        "title": "Latency Over Time (p50/p95/p99)",
+        "gridPos": {"x": 0, "y": 20, "w": 24, "h": 6},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, sum(rate(http_request_duration_seconds_bucket[1m])) by (le, service)) * 1000",
+            "legendFormat": "{{service}} p50",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[1m])) by (le, service)) * 1000",
+            "legendFormat": "{{service}} p95",
+            "refId": "B"
+          },
+          {
+            "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket[1m])) by (le, service)) * 1000",
+            "legendFormat": "{{service}} p99",
+            "refId": "C"
+          }
+        ]
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "type": "query",
+          "name": "service",
+          "datasource": "Prometheus",
+          "label": "Service",
+          "query": "label_values(http_requests_total, service)",
+          "includeAll": true,
+          "multi": true
+        }
+      ]
+    }
+  },
+  "overwrite": true
+}

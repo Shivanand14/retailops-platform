@@ -1,0 +1,11 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "inventory-service.fullname" . }}
+  labels:
+    {{- include "inventory-service.labels" . | nindent 4 }}
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      {{- include "inventory-service.selectorLabels" . | nindent 6 }}

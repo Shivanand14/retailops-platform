@@ -1,0 +1,23 @@
+apiVersion: litmuschaos.io/v1alpha1
+description: |
+  Pod chaos experiment for RetailOps Platform.
+  Simulates pod failure to validate self-healing, PDB, and observability alerting.
+metadata:
+  name: pod-chaos-retailops
+  namespace: litmus
+spec:
+  definition:
+    args:
+    - --pods-affected-perc=50
+    - --target-pods=app.kubernetes.io/name=order-service
+    command: /bin/bash
+    image: litmuschaos/go-runner:latest
+    imagePullPolicy: Always
+    scope: Namespaced
+    type: string
+  faultName: pod-delete
+  tags:
+    - category: availability
+    - project: retailops
+    - skill: sre
+    - skill: kubernetes

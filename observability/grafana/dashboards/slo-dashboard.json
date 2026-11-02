@@ -1,0 +1,126 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "RetailOps — SLO & Error Budget",
+    "tags": ["retailops", "slo", "sre"],
+    "timezone": "UTC",
+    "schemaVersion": 38,
+    "version": 1,
+    "refresh": "1m",
+    "panels": [
+      {
+        "type": "stat",
+        "title": "Order Service Availability SLO",
+        "gridPos": {"x": 0, "y": 0, "w": 8, "h": 4},
+        "targets": [
+          {
+            "expr": "100 * sum(rate(http_requests_total{service=\"order-service\",status!~\"5..\"}[1m])) / sum(rate(http_requests_total{service=\"order-service\"}[1m]))",
+            "legendFormat": "Availability %",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "decimals": 4,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"color": "red", "value": null},
+                {"color": "orange", "value": 99.0},
+                {"color": "green", "value": 99.9}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "type": "stat",
+        "title": "Error Budget Remaining",
+        "gridPos": {"x": 8, "y": 0, "w": 8, "h": 4},
+        "targets": [
+          {
+            "expr": "100 - (100 * sum(rate(http_requests_total{service=\"order-service\",status=~\"5..\"}[1m])) / sum(rate(http_requests_total{service=\"order-service\"}[1m]))) / 0.001 * 100",
+            "legendFormat": "Budget Remaining %",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "decimals": 2,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"color": "red", "value": null},
+                {"color": "orange", "value": 50},
+                {"color": "green", "value": 90}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "type": "stat",
+        "title": "Order Service p95 Latency SLO",
+        "gridPos": {"x": 16, "y": 0, "w": 8, "h": 4},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{service=\"order-service\"}[1m])) by (le)) * 1000",
+            "legendFormat": "p95 ms",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ms",
+            "decimals": 2,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "orange", "value": 200},
+                {"color": "red", "value": 500}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "type": "graph",
+        "title": "Error Budget Burn Rate (1h / 6h / 24h)",
+        "gridPos": {"x": 0, "y": 4, "w": 24, "h": 8},
+        "targets": [
+          {
+            "expr": "sum(rate(http_requests_total{service=\"order-service\",status=~\"5..\"}[1h])) / sum(rate(http_requests_total{service=\"order-service\"}[1h])) / 0.001",
+            "legendFormat": "1h burn rate",
+            "refId": "A"
+          },
+          {
+            "expr": "sum(rate(http_requests_total{service=\"order-service\",status=~\"5..\"}[6h])) / sum(rate(http_requests_total{service=\"order-service\"}[6h])) / 0.001",
+            "legendFormat": "6h burn rate",
+            "refId": "B"
+          },
+          {
+            "expr": "sum(rate(http_requests_total{service=\"order-service\",status=~\"5..\"}[24h])) / sum(rate(http_requests_total{service=\"order-service\"}[24h])) / 0.001",
+            "legendFormat": "24h burn rate",
+            "refId": "C"
+          }
+        ]
+      },
+      {
+        "type": "graph",
+        "title": "SLO Compliance Over Time (30 days)",
+        "gridPos": {"x": 0, "y": 12, "w": 24, "h": 8},
+        "targets": [
+          {
+            "expr": "100 * sum(rate(http_requests_total{service=\"order-service\",status!~\"5..\"}[1m])) / sum(rate(http_requests_total{service=\"order-service\"}[1m]))",
+            "legendFormat": "Availability %",
+            "refId": "A"
+          }
+        ]
+      }
+    ]
+  },
+  "overwrite": true
+}

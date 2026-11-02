@@ -1,0 +1,56 @@
+graph TD
+    subgraph Client
+        User[User / Mobile App]
+    end
+
+    subgraph Edge
+        LB[NGINX Ingress Controller]
+        GW[API Gateway Service]
+    end
+
+    subgraph RetailOps [retailops namespace]
+        OS[Order Service<br/>Deployment ×2<br/>HPA + PDB]
+        PS[Payment Service<br/>Deployment ×2<br/>HPA + PDB]
+        IS[Inventory Service<br/>Deployment ×2<br/>HPA + PDB]
+        US[User Service<br/>Deployment ×2<br/>HPA + PDB]
+    end
+
+    subgraph Data [Stateful Services]
+        DB[(PostgreSQL<br/>Order & Inventory)]
+        Redis[(Redis<br/>Cache & Sessions)]
+        MQ[(RabbitMQ<br/>Async Events)]
+    end
+
+    subgraph Monitoring [monitoring namespace]
+        Prom[Prometheus<br/>Metrics]
+        Grafana[Grafana<br/>Dashboards]
+        Alert[Alertmanager<br/>Alerting]
+        Loki[Loki<br/>Logs]
+        Tempo[Tempo<br/>Traces]
+    end
+
+    User --> LB
+    LB --> GW
+    GW --> OS
+    GW --> PS
+    GW --> IS
+    GW --> US
+
+    OS --> DB
+    OS --> Redis
+    OS --> MQ
+    PS --> DB
+    IS --> DB
+    US --> DB
+
+    OS -.-> Prom
+    PS -.-> Prom
+    IS -.-> Prom
+    US -.-> Prom
+    Prom --> Grafana
+    Prom --> Alert
+
+    linkStyle default stroke-width:2px,fill:none,stroke:#333
+    style RetailOps fill:#e1f5fe,stroke:#01579b
+    style Monitoring fill:#f3e5f5,stroke:#4a148c
+    style Data fill:#e8f5e9,stroke:#1b5e20
