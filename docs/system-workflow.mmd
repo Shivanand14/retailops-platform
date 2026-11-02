@@ -1,0 +1,61 @@
+flowchart TD
+    %% System Architecture & Request Flow - RetailOps Platform
+    classDef client fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef edge fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef service fill:#e8f5e9,stroke:#1b5e20,stroke-width:2px
+    classDef data fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
+    classDef obs fill:#fce4ec,stroke:#880e4f,stroke-width:2px
+
+    Client([Client / Mobile App]):::client --> LB[NGINX Ingress Controller]:::edge
+    LB --> GW[API Gateway Service]:::service
+    
+    GW --> OS[Order Service<br/>Deployment ×2<br/>HPA + PDB]:::service
+    GW --> PS[Payment Service<br/>Deployment ×2<br/>HPA + PDB]:::service
+    GW --> IS[Inventory Service<br/>Deployment ×2<br/>HPA + PDB]:::service
+    GW --> US[User Service<br/>Deployment ×2<br/>HPA + PDB]:::service
+    
+    OS --> DB[(PostgreSQL<br/>Orders & Inventory)]:::data
+    OS --> Redis[(Redis<br/>Cache & Sessions)]:::data
+    OS --> MQ[(RabbitMQ<br/>Async Events)]:::data
+    PS --> DB
+    IS --> DB
+    US --> DB
+    
+    OS -.-> Prom[Prometheus<br/>Metrics]:::obs
+    PS -.-> Prom
+    IS -.-> Prom
+    US -.-> Prom
+    
+    Prom --> Grafana[Grafana<br/>Dashboards]:::obs
+    Prom --> Alert[Alertmanager<br/>Alerting]:::obs
+    
+    Logs[Loki<br/>Logs]:::obs
+    Traces[Tempo<br/>Traces]:::obs
+    
+    OS -.-> Logs
+    OS -.-> Traces
+    
+    subgraph RetailOps [retailops namespace]
+        OS
+        PS
+        IS
+        US
+    end
+    
+    subgraph DataLayer [Stateful Services]
+        DB
+        Redis
+        MQ
+    end
+    
+    subgraph Monitoring [monitoring namespace]
+        Prom
+        Grafana
+        Alert
+        Logs
+        Traces
+    end
+    
+    style Client fill:#e1f5fe,stroke:#01579b,stroke-width:3px
+    style LB fill:#f3e5f5,stroke:#4a148c,stroke-width:3px
+    style Grafana fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px

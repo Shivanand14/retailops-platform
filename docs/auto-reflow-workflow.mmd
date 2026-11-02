@@ -1,0 +1,32 @@
+flowchart TD
+    %% Auto-Reflow Pipeline - Agent Workflow
+    classDef agent fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef decision fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
+    classDef success fill:#d4edda,stroke:#28a745,stroke-width:2px
+    classDef danger fill:#f8d7da,stroke:#dc3545,stroke-width:2px
+
+    Start([Incident RESOLVED]) --> A1[Agent 1: Root Cause<br>& State Auditor]:::agent
+    
+    A1 --> D1{Blocker Resolved?}:::decision
+    D1 -->|No| Halt[Halt Pipeline<br/>Await Infrastructure]:::danger
+    D1 -->|Yes| A2[Agent 2: Payload Repair<br>Engineer]:::agent
+    
+    A2 --> A3[Agent 3: Neustar Validator<br>& Guardrail]:::agent
+    
+    A3 --> D2{Approved?}:::decision
+    D2 -->|Yes| Reflow[Order Reflowed<br>to Backend Queue]:::success
+    D2 -->|No| DLQ[Dead-Letter-Queue<br/>Quarantined]:::danger
+    
+    A1 --> L1[Structured JSON<br/>AuditResult]:::agent
+    A2 --> L2[Structured JSON<br/>RepairResult]:::agent
+    A3 --> L3[Structured JSON<br/>ValidationResult]:::agent
+    
+    subgraph Pydantic Schemas [Strict JSON Validation]
+        L1
+        L2
+        L3
+    end
+    
+    style Start fill:#e1f5fe,stroke:#01579b,stroke-width:3px
+    style Reflow fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
+    style DLQ fill:#ffcdd2,stroke:#c62828,stroke-width:3px

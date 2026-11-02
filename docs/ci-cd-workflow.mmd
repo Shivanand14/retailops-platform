@@ -1,0 +1,49 @@
+flowchart TD
+    %% CI/CD Workflow - RetailOps Platform
+    classDef default fill:#f9f9f9,stroke:#333,stroke-width:2px
+    classDef success fill:#d4edda,stroke:#28a745,stroke-width:2px
+    classDef warning fill:#fff3cd,stroke:#ffc107,stroke-width:2px
+    classDef danger fill:#f8d7da,stroke:#dc3545,stroke-width:2px
+    classDef info fill:#d1ecf1,stroke:#17a2b8,stroke-width:2px
+
+    A[Code Push / Pull Request] --> B{Event Type}
+    B -->|Push to main| C[Build & Push Docker Images]
+    B -->|Pull Request| D[Lint & Unit Tests]
+    
+    C --> E[GitHub Container Registry]
+    E --> F[Deploy to Production]
+    
+    D --> G[flake8 + black]
+    G --> H[pytest]
+    H --> I{Tests Pass?}
+    I -->|No| J[Fail Pipeline]:::danger
+    I -->|Yes| K[Helm Lint & Template]
+    K --> L{Chart Valid?}
+    L -->|No| M[Fail Pipeline]:::danger
+    L -->|Yes| N[Dry-Run Deploy Validation]
+    
+    N --> O[Pipeline Success]:::success
+    F --> P[Production Deployed]:::success
+    
+    subgraph CI [Continuous Integration]
+        D
+        G
+        H
+        K
+        N
+    end
+    
+    subgraph CD [Continuous Deployment]
+        C
+        E
+        F
+    end
+    
+    style A fill:#e1f5fe,stroke:#01579b,stroke-width:3px
+    style B fill:#f3e5f5,stroke:#4a148c,stroke-width:3px
+    style O fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
+    style P fill:#c8e6c9,stroke:#2e7d3,stroke-width:3px
+    
+    linkStyle default stroke:#666,stroke-width:2px
+    linkStyle 0,1 stroke:#01579b,stroke-width:3px
+    linkStyle 8,9 stroke:#2e7d32,stroke-width:3px
