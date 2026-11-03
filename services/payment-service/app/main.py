@@ -1,6 +1,7 @@
 """
 RetailOps Platform — Payment Service (FastAPI)
 """
+
 from __future__ import annotations
 
 import os
@@ -90,7 +91,9 @@ async def metrics_middleware(request: Request, call_next):
 
 @app.get("/healthz", response_model=HealthResponse, tags=["health"])
 async def liveness():
-    return HealthResponse(status="healthy", service=SERVICE_NAME, version=SERVICE_VERSION)
+    return HealthResponse(
+        status="healthy", service=SERVICE_NAME, version=SERVICE_VERSION
+    )
 
 
 @app.get("/ready", response_model=HealthResponse, tags=["health"])
@@ -103,9 +106,15 @@ async def metrics():
     return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 
-@app.post("/payments", response_model=PaymentResponse, status_code=201, tags=["payments"])
+@app.post(
+    "/payments", response_model=PaymentResponse, status_code=201, tags=["payments"]
+)
 async def process_payment(payment: PaymentRequest, request: Request):
-    request_id = request.state.request_id if hasattr(request.state, "request_id") else str(uuid.uuid4())
+    request_id = (
+        request.state.request_id
+        if hasattr(request.state, "request_id")
+        else str(uuid.uuid4())
+    )
     payment_id = f"PAY-{int(time.time())}-{request_id[:8]}"
 
     print(
@@ -125,4 +134,5 @@ async def process_payment(payment: PaymentRequest, request: Request):
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8080)

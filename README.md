@@ -295,12 +295,18 @@ curl http://localhost:8080/metrics
 
 ### GitHub Actions CI/CD
 
-The `.github/workflows/ci-cd.yml` pipeline runs on every push/PR:
+The `.github/workflows/ci-cd.yml` pipeline runs on pushes and pull requests targeting
+`main`, and can also be started manually with **Actions → CI/CD — RetailOps Platform →
+Run workflow**:
 
-1. **lint-test** — flake8, black, pytest per service (matrix)
-2. **build-push** — Docker build & push to GitHub Container Registry (GHCR)
-3. **deploy-dry-run** — Helm lint + template validation on PRs
-4. **deploy-prod** — Production deploy on `main` branch (requires `KUBE_CONFIG_DATA` secret)
+1. **lint-test** — flake8, Black formatting, and API tests for each service.
+2. **validate-charts** — lint and render all four Helm charts.
+3. **build-push** — build each service image after all checks pass. Pull requests build
+   images without publishing them; runs on `main` publish versioned images to GHCR.
+
+The workflow does not deploy to a production cluster. Configure and review a real
+deployment target, credentials, and approval policy before adding a production deploy
+job; a successful CI run verifies the tested code, charts, and container builds only.
 
 ### Load Testing
 

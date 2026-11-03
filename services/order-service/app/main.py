@@ -136,7 +136,9 @@ async def metrics_and_request_id_middleware(request: Request, call_next):
 @app.get("/healthz", response_model=HealthResponse, tags=["health"])
 async def liveness():
     """Kubernetes liveness probe."""
-    return HealthResponse(status="healthy", service=SERVICE_NAME, version=SERVICE_VERSION)
+    return HealthResponse(
+        status="healthy", service=SERVICE_NAME, version=SERVICE_VERSION
+    )
 
 
 @app.get("/ready", response_model=HealthResponse, tags=["health"])
